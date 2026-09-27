@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>AgriWork • Machine Work Entry</title>
+<style>
+  :root{
+    --bg:#f8f9ff;
+    --white:#ffffff;
+    --green-950:#002114;
+    --green-900:#012d1d;
+    --green-800:#1b4332;
+    --green-700:#2c694e;
+    --green-600:#316e52;
+    --green-500:#52796f;
+    --mint-200:#b1f0ce;
+    --mint-300:#aeeecb;
+    --mint-100:#c1ecd4;
+    --blue-100:#dee9fc;
+    --blue-50:#eff4ff;
+    --blue-75:#e6eeff;
+    --ink-900:#121c2a;
+    --ink-600:#414844;
+    --red-100:#ffdad6;
+    --red-900:#93000a;
+    --r-sm:8px;--r-md:12px;--r-lg:16px;--r-full:9999px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Tamil",Helvetica,Arial,sans-serif;
+    color:var(--ink-900);
+    -webkit-font-smoothing:antialiased;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  .app{max-width:448px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;display:flex;flex-direction:column;}
+
+  /* ---------- Header ---------- */
+  .app-header{
+    position:sticky;top:0;z-index:20;
+    background:rgba(248,249,255,.9);backdrop-filter:blur(12px);
+    box-shadow:0 1px 8px rgba(0,0,0,.04);
+    padding:16px;display:flex;align-items:center;justify-content:space-between;
+  }
+  .hdr-left{display:flex;align-items:center;gap:8px;min-width:0;}
+  .back-btn{
+    width:40px;height:40px;border:none;background:transparent;border-radius:var(--r-full);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;
+    color:var(--ink-900);
+  }
+  .back-btn:disabled{opacity:0;pointer-events:none;}
+  .brand-logo{
+    width:32px;height:32px;border-radius:8px;background:var(--green-800);
+    display:flex;align-items:center;justify-content:center;font-size:16px;flex:0 0 auto;
+  }
+  .hdr-title{font-weight:700;font-size:11px;letter-spacing:.3px;color:var(--ink-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hdr-right{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+  .pill-online{
+    display:flex;align-items:center;gap:4px;background:var(--mint-200);
+    padding:4px 8px;border-radius:var(--r-full);font-size:11px;font-weight:700;
+    color:var(--green-950);letter-spacing:.3px;text-transform:uppercase;
+  }
+  .pill-dot{width:8px;height:8px;border-radius:50%;background:var(--green-700);}
+  .icon-btn{
+    width:32px;height:32px;border-radius:var(--r-full);border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;background:var(--green-900);color:#fff;
+  }
+
+  /* ---------- Screens ---------- */
+  .screen{display:none;flex-direction:column;flex:1;}
+  .screen.active{display:flex;}
+  .screen-pad{padding:16px;display:flex;flex-direction:column;gap:16px;}
+
+  .eyebrow{
+    display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.3px;
+    text-transform:uppercase;color:var(--green-700);padding:8px 0 4px;
+  }
+
+  /* ---------- Cards (work-type select) ---------- */
+  .machine-list{display:flex;flex-direction:column;gap:16px;}
+  .m-card{
+    position:relative;background:var(--white);border-radius:var(--r-lg);padding:16px;
+    box-shadow:0 1px 1px rgba(0,0,0,.05);border:2px solid transparent;cursor:pointer;
+    transition:box-shadow .15s,border-color .15s,background .15s;
+  }
+  .m-card.selected{
+    border-color:var(--green-800);
+    box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);
+  }
+  .m-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;min-height:24px;}
+  .badge-idx{display:flex;align-items:center;gap:4px;background:var(--blue-100);padding:4px 8px;border-radius:var(--r-full);font-size:11px;font-weight:700;color:var(--ink-600);letter-spacing:.3px;}
+  .badge-idx .dot{width:8px;height:8px;border-radius:50%;background:var(--green-700);}
+  .badge-selected{display:none;align-items:center;gap:4px;background:var(--mint-200);padding:4px 8px;border-radius:var(--r-full);font-size:11px;font-weight:700;color:var(--green-950);letter-spacing:.3px;}
+  .m-card.selected .badge-selected{display:flex;}
+  .m-card.selected .badge-idx{display:none;}
+  .m-card-body{display:flex;gap:16px;align-items:flex-start;}
+  .m-icon{
+    width:45px;height:45px;flex:0 0 auto;background:var(--blue-100);border-radius:var(--r-full);
+    display:flex;align-items:center;justify-content:center;font-size:22px;
+  }
+  .m-text{flex:1;min-width:0;}
+  .m-title-ta{font-size:18px;font-weight:700;color:var(--ink-900);line-height:1.3;margin:0 0 2px;}
+  .m-title-en{font-size:13px;font-weight:700;color:var(--green-700);margin:0 0 4px;letter-spacing:.1px;}
+  .m-desc{font-size:13px;color:var(--ink-600);margin:0;line-height:1.4;}
+  .m-arrow{
+    width:40px;height:40px;flex:0 0 auto;border-radius:var(--r-full);display:flex;align-items:center;
+    justify-content:center;background:var(--blue-75);color:var(--green-900);align-self:center;
+  }
+  .m-card.selected .m-arrow{background:var(--green-900);color:#fff;}
+  .m-rate{
+    display:flex;align-items:center;justify-content:space-between;background:var(--blue-50);
+    border-radius:var(--r-md);padding:6px 8px;margin-top:12px;font-size:11px;font-weight:600;color:var(--ink-600);
+  }
+  .m-rate b{font-size:15px;font-weight:700;color:var(--green-900);}
+
+  /* ---------- Fields ---------- */
+  .field{display:flex;flex-direction:column;gap:6px;width:100%;}
+  .field label{font-size:13px;font-weight:700;color:var(--ink-900);}
+  .field label small{font-weight:400;font-family:inherit;color:var(--ink-600);font-size:12px;}
+  .input-wrap{position:relative;}
+  .input-wrap .ic{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--green-700);display:flex;}
+  .input-wrap input, .input-wrap textarea{
+    width:100%;background:var(--blue-50);border:none;border-radius:var(--r-sm);
+    padding:13px 12px 13px 40px;font-size:16px;color:var(--ink-900);font-family:inherit;
+  }
+  .input-wrap input:focus, .input-wrap textarea:focus{outline:2px solid var(--green-700);outline-offset:-1px;}
+  .hint{display:flex;gap:6px;align-items:flex-start;color:var(--ink-600);font-size:13px;padding:0 4px;}
+  .hint svg{flex:0 0 auto;margin-top:3px;}
+
+  .chip-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{
+    background:var(--blue-75);border:none;border-radius:var(--r-full);padding:6px 12px;
+    font-size:13px;color:var(--ink-900);cursor:pointer;white-space:nowrap;
+  }
+
+  .summary-docket{
+    display:flex;align-items:center;justify-content:space-between;background:rgba(217,227,246,.6);
+    padding:8px;border-radius:var(--r-md);gap:8px;
+  }
+  .summary-docket .left{display:flex;gap:4px;align-items:flex-start;min-width:0;}
+  .summary-docket .txt{min-width:0;}
+  .summary-docket .t1{font-size:11px;font-weight:700;color:var(--green-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .summary-docket .t2{font-size:13px;color:var(--ink-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .step-badge{background:var(--mint-200);padding:2px 10px;border-radius:var(--r-full);font-size:11px;font-weight:700;color:var(--green-600);text-align:center;white-space:nowrap;}
+
+  .btn-primary{
+    background:var(--green-900);color:#fff;border:none;border-radius:var(--r-md);
+    padding:16px;font-size:15px;font-weight:700;letter-spacing:.3px;cursor:pointer;width:100%;
+    box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);
+  }
+  .btn-primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
+  .btn-primary.big{background:var(--green-700);padding:15px;font-size:18px;}
+
+  /* ---------- Details screen ---------- */
+  .selection-pill{
+    display:flex;align-items:center;justify-content:space-between;background:var(--blue-100);
+    padding:16px;border-radius:var(--r-md);box-shadow:0 1px 1px rgba(0,0,0,.05);
+  }
+  .selection-pill .left{display:flex;gap:10px;align-items:center;min-width:0;}
+  .selection-pill .ic{width:44px;height:44px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto;}
+  .selection-pill .name{font-size:15px;font-weight:600;color:var(--ink-900);}
+  .selection-pill .sub{font-size:11px;font-weight:700;color:var(--ink-600);}
+  .selection-pill .rate{font-size:13px;font-weight:700;color:var(--green-700);}
+  .btn-change{background:#fff;border:none;border-radius:8px;padding:11px 10px;font-size:13px;font-weight:600;color:var(--green-900);display:flex;align-items:center;gap:4px;cursor:pointer;box-shadow:0 1px 1px rgba(0,0,0,.05);white-space:nowrap;}
+
+  .title-section h2{font-size:24px;margin:0 0 2px;font-weight:700;color:var(--ink-900);}
+  .title-section .sub-ta{font-size:14px;color:var(--green-700);margin:0 0 4px;}
+  .title-section .sub-note{font-size:13px;color:var(--ink-600);margin:0;}
+
+  .card{background:#fff;border-radius:var(--r-md);padding:16px;box-shadow:0 1px 1px rgba(0,0,0,.05);display:flex;flex-direction:column;gap:16px;}
+  .card-head{display:flex;align-items:center;justify-content:space-between;}
+  .card-head .eyebrow{padding:0;}
+
+  .stepper-row{display:flex;gap:8px;}
+  .stepper{flex:1;background:var(--blue-50);border-radius:var(--r-md);padding:8px;display:flex;flex-direction:column;align-items:center;}
+  .stepper .lbl{font-size:13px;font-weight:600;color:var(--ink-600);margin-bottom:8px;}
+  .stepper .ctrl{display:flex;align-items:center;justify-content:space-between;width:100%;}
+  .stepper button{
+    width:47px;height:48px;border:none;border-radius:8px;font-size:24px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .stepper button.dec{background:#fff;color:var(--green-900);box-shadow:0 1px 1px rgba(0,0,0,.05);}
+  .stepper button.inc{background:var(--green-700);color:#fff;box-shadow:0 1px 1px rgba(0,0,0,.05);}
+  .stepper .val{font-size:28px;font-weight:700;color:var(--ink-900);min-width:48px;text-align:center;}
+
+  .calc-banner{display:flex;gap:8px;align-items:flex-start;background:var(--blue-75);border-radius:var(--r-md);padding:8px;}
+  .calc-banner .t1{font-size:13px;font-weight:700;color:var(--ink-900);}
+  .calc-banner .t2{font-size:13px;color:var(--ink-600);}
+
+  .photo-badge{display:flex;align-items:center;gap:4px;background:var(--mint-200);padding:2px 8px;border-radius:var(--r-full);font-size:11px;font-weight:700;color:var(--green-700);}
+  .photo-drop{
+    background:var(--blue-75);border-radius:var(--r-md);overflow:hidden;position:relative;min-height:176px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .photo-drop img{width:100%;height:176px;object-fit:cover;display:block;}
+  .photo-drop .empty{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--green-700);font-size:13px;font-weight:600;padding:24px;text-align:center;}
+  .photo-overlay{position:absolute;left:0;right:0;bottom:0;padding:8px 12px;background:linear-gradient(to top, rgba(39,49,63,.85), rgba(39,49,63,.2) 60%, transparent);color:#fff;}
+  .photo-overlay .fn{font-size:13px;font-weight:700;}
+  .photo-overlay .meta{font-size:11px;font-weight:700;opacity:.9;}
+  .photo-actions{display:flex;gap:8px;}
+  .btn-secondary{flex:1;background:var(--blue-100);border:none;border-radius:8px;padding:13px;font-size:13px;font-weight:700;color:var(--green-900);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .btn-danger{flex:1;background:var(--red-100);border:none;border-radius:8px;padding:13px;font-size:13px;font-weight:700;color:var(--red-900);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+
+  .sticky-bar{
+    position:sticky;bottom:0;background:rgba(255,255,255,.95);backdrop-filter:blur(6px);
+    box-shadow:0 -4px 16px rgba(0,0,0,.06);padding:8px 16px 16px;display:none;flex-direction:column;gap:6px;
+    padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));
+  }
+  .sticky-bar.active{display:flex;}
+  .sticky-bar .note{font-size:11px;font-weight:600;color:var(--ink-600);text-align:center;}
+  .btn-primary .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-3px;margin-right:8px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ---------- Confirmation ---------- */
+  .confirm-hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 16px 8px;gap:8px;}
+  .confirm-check-wrap{position:relative;margin-bottom:8px;}
+  .confirm-check{width:80px;height:80px;border-radius:50%;background:var(--mint-200);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 6px -1px rgba(0,0,0,.1);}
+  .confirm-check .inner{width:56px;height:56px;border-radius:50%;background:var(--green-800);display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;}
+  .synced-badge{position:absolute;top:-4px;right:-8px;background:var(--mint-300);border-radius:var(--r-full);padding:2px 8px;font-size:11px;font-weight:700;color:var(--green-600);display:flex;align-items:center;gap:4px;box-shadow:0 1px 1px rgba(0,0,0,.05);}
+  .synced-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--green-700);}
+  .confirm-hero h2{margin:0;font-size:24px;color:var(--green-900);}
+  .confirm-hero .sub{margin:0;font-size:18px;font-weight:600;color:var(--green-700);}
+  .docket-pill{display:flex;align-items:center;gap:6px;background:var(--blue-100);padding:4px 8px;border-radius:var(--r-full);font-size:11px;font-weight:700;color:var(--ink-600);}
+  .docket-pill b{color:var(--ink-900);}
+
+  .receipt{background:#fff;border-radius:var(--r-md);box-shadow:0 1px 1px rgba(0,0,0,.05);overflow:hidden;display:flex;flex-direction:column;gap:8px;padding-bottom:16px;}
+  .receipt-head{display:flex;align-items:center;justify-content:space-between;background:var(--blue-50);padding:8px 16px;}
+  .receipt-head .left{display:flex;gap:8px;align-items:center;}
+  .receipt-head .ic{width:26px;height:28px;border-radius:8px;background:var(--green-800);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;}
+  .receipt-head .ttl{font-size:15px;font-weight:600;color:var(--ink-900);}
+  .receipt-head .today{background:var(--mint-200);padding:2px 10px;border-radius:var(--r-full);font-size:11px;font-weight:700;color:var(--green-950);text-align:center;}
+  .receipt-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 8px;padding:0 16px;}
+  .receipt-grid .lbl{font-size:11px;font-weight:700;color:var(--ink-600);margin-bottom:2px;}
+  .receipt-grid .val{font-size:14px;font-weight:600;color:var(--ink-900);}
+  .receipt-grid .sub{font-size:11px;font-weight:700;color:var(--ink-600);margin-top:2px;}
+  .receipt-amount{display:flex;align-items:center;justify-content:space-between;background:var(--blue-75);border-radius:8px;padding:8px;margin:0 16px;}
+  .receipt-amount .lbl{font-size:11px;font-weight:700;color:var(--ink-600);}
+  .receipt-amount .val{font-size:15px;font-weight:700;color:var(--ink-900);}
+  .receipt-amount .total-lbl{font-size:11px;font-weight:700;color:var(--ink-600);text-align:right;}
+  .receipt-amount .total-val{font-size:28px;font-weight:700;color:var(--green-900);text-align:right;}
+  .receipt-photo-note{display:flex;align-items:center;justify-content:space-between;background:var(--blue-50);border-radius:8px;padding:8px;margin:0 16px;font-size:11px;}
+  .receipt-photo-note .left{display:flex;gap:6px;align-items:center;color:var(--ink-900);}
+  .receipt-photo-note .right{color:var(--green-700);font-weight:700;}
+  .receipt-photo{margin:0 16px;border-radius:8px;overflow:hidden;position:relative;}
+  .receipt-photo img{width:100%;height:96px;object-fit:cover;display:block;}
+  .receipt-photo .cap{position:absolute;right:8px;bottom:4px;background:rgba(39,49,63,.85);color:#eaf1ff;font-size:10px;padding:2px 6px;border-radius:4px;backdrop-filter:blur(2px);}
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{position:fixed;inset:0;background:rgba(18,28,42,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:16px;}
+  .modal-overlay.active{display:flex;}
+  .modal{background:#fff;border-radius:var(--r-lg);padding:20px;width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;}
+  .modal h3{margin:0;font-size:18px;color:var(--ink-900);}
+  .modal .field label{font-size:13px;}
+  .modal-actions{display:flex;gap:8px;margin-top:4px;}
+  .modal-actions button{flex:1;padding:12px;border-radius:8px;border:none;font-weight:700;font-size:14px;cursor:pointer;}
+  .modal-actions .cancel{background:var(--blue-50);color:var(--ink-900);}
+  .modal-actions .save{background:var(--green-800);color:#fff;}
+
+  /* ---------- Toast ---------- */
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(100px);background:var(--ink-900);color:#fff;padding:12px 18px;border-radius:var(--r-full);font-size:14px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.2);z-index:100;transition:transform .25s;max-width:90%;text-align:center;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.error{background:var(--red-900);}
+
+  input[type=file]{display:none;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== HEADER (shared) ===== -->
+  <header class="app-header">
+    <div class="hdr-left">
+      <button class="back-btn" id="backBtn" title="Back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="brand-logo">🌾</div>
+      <div class="hdr-title">AGRI WORK • Machine Work Entry</div>
+    </div>
+    <div class="hdr-right">
+      <div class="pill-online"><span class="pill-dot"></span>ONLINE</div>
+      <button class="icon-btn" id="settingsBtn" title="Settings">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="white" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="white" stroke-width="1.5"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== SCREEN 1 : SELECT WORK TYPE ===== -->
+  <main class="screen active" id="screenSelect">
+    <div class="screen-pad">
+      <div class="eyebrow">🌿 வேலை வகை தேர்வு • SELECT MACHINE WORK</div>
+      <div class="machine-list" id="machineList"></div>
+
+      <div class="field">
+        <label>03 — Machine / Vehicle Title <br><small>(வண்டியின் பெயர்) — Identify tractor, harvester, or power tiller</small></label>
+        <div class="input-wrap">
+          <span class="ic">
+            <svg width="17" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 13h13l3 5H6l-3-5z" stroke="currentColor" stroke-width="2"/><circle cx="7" cy="18" r="2" stroke="currentColor" stroke-width="2"/><circle cx="17" cy="18" r="2" stroke="currentColor" stroke-width="2"/><path d="M6 13V7h6l4 6" stroke="currentColor" stroke-width="2"/></svg>
+          </span>
+          <input type="text" id="machineTitle" placeholder="e.g. Darshana Harvester" />
+        </div>
+        <div class="chip-row" id="chipRow">
+          <button class="chip" type="button">🌾 Darshana Vandi</button>
+          <button class="chip" type="button">🚜 Surya Vandi</button>
+          <button class="chip" type="button">⭐ Raja Vandi</button>
+          <button class="chip" type="button">🚜 John Deere 5050D</button>
+        </div>
+        <div class="hint">
+          <svg width="13" height="11" viewBox="0 0 24 24" fill="none"><path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/></svg>
+          <span>Customer-க்கு எளிதாக அடையாளம் காணும் வண்டி பெயர்.</span>
+        </div>
+      </div>
+
+      <div class="summary-docket">
+        <div class="left">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#012d1d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="txt">
+            <div class="t1" id="summarySelectedText">Selected: —</div>
+            <div class="t2">அடுத்த படிக்கு செல்லவும் (Ready for details)</div>
+          </div>
+        </div>
+        <div class="step-badge">Step<br>1/2</div>
+      </div>
+
+      <button class="btn-primary" id="continueBtn" disabled>Continue → / தொடரவும்</button>
+    </div>
+  </main>
+
+  <!-- ===== SCREEN 2 : WORK DETAILS ===== -->
+  <main class="screen" id="screenDetails">
+    <div class="screen-pad">
+      <div class="selection-pill">
+        <div class="left">
+          <div class="ic" id="selIcon">🚜</div>
+          <div>
+            <div class="name" id="selName">—</div>
+            <div class="rate" id="selRate">—</div>
+          </div>
+        </div>
+        <button class="btn-change" id="changeBtn">
+          <svg width="13" height="11" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0114-5.3M20 12a8 8 0 01-14 5.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M18 4v4h-4M6 20v-4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          மாற்று
+        </button>
+      </div>
+
+      <div class="title-section">
+        <h2 id="detailsTitleEn">Work Details</h2>
+        <div class="sub-ta" id="detailsTitleTa">வேலை விவரங்கள்</div>
+        <div class="sub-note">Customer மற்றும் வேலை விவரங்களை பதிவு செய்யவும்.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="eyebrow">01 — CUSTOMER DETAILS / கஸ்டமர் விவரம்</div></div>
+
+        <div class="field">
+          <label>Customer Name <small>(கஸ்டமர் பெயர்)</small></label>
+          <div class="input-wrap">
+            <span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="2"/></svg></span>
+            <input type="text" id="customerName" placeholder="Kumar" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Phone Number <small>(செல்போன் எண்)</small></label>
+          <div class="input-wrap">
+            <span class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.3 1.8.6 2.7a2 2 0 01-.4 2.1L8 9.9a16 16 0 006 6l1.5-1.3a2 2 0 012.1-.4c.9.3 1.8.5 2.7.6a2 2 0 011.7 2.1z" stroke="currentColor" stroke-width="2"/></svg></span>
+            <input type="tel" id="phoneNumber" placeholder="+91 98765 43210" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Place / Village Name <small>(ஊர் / இடம்)</small></label>
+          <div class="input-wrap">
+            <span class="ic"><svg width="12" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 22s7-7.4 7-13a7 7 0 10-14 0c0 5.6 7 13 7 13z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="2"/></svg></span>
+            <input type="text" id="place" placeholder="Perundurai" />
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="eyebrow" id="timeEyebrow">04 — MACHINE WORKED TIME / ஓடிய நேரம்</div>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#414844" stroke-width="1.8"/><path d="M12 6v6l4 2" stroke="#414844" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+
+        <div id="hoursMinutesBlock" class="stepper-row">
+          <div class="stepper">
+            <div class="lbl">Hours (மணி)</div>
+            <div class="ctrl">
+              <button class="dec" data-target="hours" data-dir="-1">−</button>
+              <div class="val" id="hoursVal">5</div>
+              <button class="inc" data-target="hours" data-dir="1">+</button>
+            </div>
+          </div>
+          <div class="stepper">
+            <div class="lbl">Minutes (நிமிடம்)</div>
+            <div class="ctrl">
+              <button class="dec" data-target="minutes" data-dir="-1">−</button>
+              <div class="val" id="minutesVal">30</div>
+              <button class="inc" data-target="minutes" data-dir="1">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="packsBlock" class="stepper-row" style="display:none;">
+          <div class="stepper">
+            <div class="lbl">Number of Packs (பேக் எண்ணிக்கை)</div>
+            <div class="ctrl">
+              <button class="dec" data-target="packs" data-dir="-1">−</button>
+              <div class="val" id="packsVal">1</div>
+              <button class="inc" data-target="packs" data-dir="1">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="calc-banner">
+          <svg width="17" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 8v5l3 2" stroke="#012d1d" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="13" r="8" stroke="#012d1d" stroke-width="2"/><path d="M9 2h6M12 5V2" stroke="#012d1d" stroke-width="2" stroke-linecap="round"/></svg>
+          <div>
+            <div class="t1" id="calcLine1">Total Time: 5 Hours 30 Minutes (5.5 hrs)</div>
+            <div class="t2" id="calcLine2">Estimated Amount: ₹9,900</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="eyebrow">05 — FIELD PHOTO / காட்டின் போட்டோ</div>
+          <div class="photo-badge" id="photoBadge" style="display:none;">✓ Photo Added</div>
+        </div>
+        <div class="photo-drop" id="photoDrop">
+          <div class="empty" id="photoEmpty">
+            <svg width="28" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 8h3l2-3h6l2 3h3v11H4V8z" stroke="#2c694e" stroke-width="1.8"/><circle cx="12" cy="13" r="3.2" stroke="#2c694e" stroke-width="1.8"/></svg>
+            Tap to add field photo
+          </div>
+          <img id="photoImg" style="display:none;" />
+          <div class="photo-overlay" id="photoOverlay" style="display:none;">
+            <div class="fn" id="photoFn">photo.jpg</div>
+            <div class="meta" id="photoMeta">Uploaded now</div>
+          </div>
+        </div>
+        <input type="file" id="photoInput" accept="image/*" capture="environment" />
+        <div class="photo-actions">
+          <button class="btn-secondary" id="changePhotoBtn">
+            <svg width="15" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 8h3l2-3h6l2 3h3v11H4V8z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="1.8"/></svg>
+            Change Photo
+          </button>
+          <button class="btn-danger" id="removePhotoBtn">
+            <svg width="12" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" stroke="currentColor" stroke-width="1.8"/></svg>
+            Remove
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+  <div class="sticky-bar" id="detailsBar">
+    <button class="btn-primary big" id="submitBtn">சேமிக்கவும் / Submit Entry</button>
+    <div class="note">வேலை விவரங்கள் அனைத்தும் சரியாக உள்ளதா என்பதை சரிபார்த்து Save</div>
+  </div>
+
+  <!-- ===== SCREEN 3 : CONFIRMATION ===== -->
+  <main class="screen" id="screenConfirm">
+    <div class="screen-pad">
+      <div class="confirm-hero">
+        <div class="confirm-check-wrap">
+          <div class="confirm-check"><div class="inner">✓</div></div>
+          <div class="synced-badge"><span class="dot"></span>SYNCED</div>
+        </div>
+        <h2>Entry Saved!</h2>
+        <div class="sub">வேலை விவரம் வெற்றிகரமாக சேமிக்கப்பட்டது</div>
+        <div class="docket-pill">📋 Docket <b id="docketId">#—</b> synced to sheet</div>
+      </div>
+
+      <div class="receipt">
+        <div class="receipt-head">
+          <div class="left">
+            <div class="ic">🧾</div>
+            <div class="ttl">வேலை ரசீது விவரம் (Work Details)</div>
+          </div>
+          <div class="today">Today •<br>இன்று</div>
+        </div>
+        <div class="receipt-grid">
+          <div><div class="lbl">Machine • வாகனம்</div><div class="val" id="rMachine">—</div></div>
+          <div><div class="lbl">Work Type • வேலை</div><div class="val" id="rWorkType">—</div></div>
+          <div><div class="lbl">Customer • விவசாயி</div><div class="val" id="rCustomer">—</div><div class="sub" id="rPlace">—</div></div>
+          <div><div class="lbl">Phone • எண்</div><div class="val" id="rPhone">—</div></div>
+        </div>
+        <div class="receipt-amount">
+          <div>
+            <div class="lbl">Working Time</div>
+            <div class="val" id="rTime">—</div>
+          </div>
+          <div>
+            <div class="total-lbl">Total Amount</div>
+            <div class="total-val" id="rAmount">₹0</div>
+          </div>
+        </div>
+        <div class="receipt-photo-note">
+          <div class="left">📷 Field Photo Attached</div>
+          <div class="right" id="rPhotoStatus">—</div>
+        </div>
+        <div class="receipt-photo" id="rPhotoWrap" style="display:none;">
+          <img id="rPhotoImg" />
+          <div class="cap" id="rPhotoCap"></div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="newEntryBtn">+ New Entry / புதிய பதிவு</button>
+    </div>
+  </main>
+
+</div>
+
+<!-- ===== SETTINGS MODAL ===== -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h3>⚙️ Rate Settings</h3>
+    <div class="field">
+      <label>Option 1 — Rate per Hour (₹)</label>
+      <div class="input-wrap" style="position:static;"><input type="number" id="setRate1" style="padding:12px;" /></div>
+    </div>
+    <div class="field">
+      <label>Option 2 — Rate per Pack (₹)</label>
+      <div class="input-wrap" style="position:static;"><input type="number" id="setRate2" style="padding:12px;" /></div>
+    </div>
+    <div class="field">
+      <label>Option 3 — Rate per Hour (₹)</label>
+      <div class="input-wrap" style="position:static;"><input type="number" id="setRate3" style="padding:12px;" /></div>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel" id="settingsCancel">Cancel</button>
+      <button class="save" id="settingsSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ================== CONFIG ==================
+  var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqe7sRWhOqKToVWAiOO9f7wEODxtupHhDpJwRTtDXs2r0isUFzIJdMcw2l3nWxSTB20A/exec";
+
+  var settings = { rate1PerHour: 1800, rate2PerPack: 0, rate3PerHour: 30 };
+
+  var MACHINES = [
+    { option:1, icon:"🚜", idx:"Machine Work 01", titleTa:"டயர் வண்டியில் அறுப்பது", titleEn:"Harvesting Machine",
+      descTa:"பயிரை அறுவடை செய்யும் வேலை (Paddy, wheat, maize crop harvest).", mode:"hours",
+      rate:function(){ return settings.rate1PerHour; }, rateUnit:"Hour (மணி)" },
+    { option:2, icon:"📦", idx:"Machine Work 02", titleTa:"பில் கட்டுவது", titleEn:"Straw Baler Machine",
+      descTa:"அறுவடை செய்யப்பட்ட வைக்கோலை கட்டு கட்டும் வேலை (Straw residue baling).", mode:"packs",
+      rate:function(){ return settings.rate2PerPack; }, rateUnit:"Pack (பேக்)" },
+    { option:3, icon:"🌾", idx:"Machine Work 03", titleTa:"பெல்ட் வண்டியில் பில் அறுப்பது", titleEn:"Belt Harvester Machine",
+      descTa:"பெல்ட் வண்டி மூலம் ஈர நில பயிர் அறுவடை செய்யும் வேலை (Wetland & belt harvest).", mode:"hours",
+      rate:function(){ return settings.rate3PerHour; }, rateUnit:"Hour (மணி)" }
+  ];
+
+  var state = {
+    option: null, machineTitle:"", customerName:"", phoneNumber:"", place:"",
+    hours:5, minutes:30, packs:1, imageBase64:null, imageFileName:null, imageMimeType:null
+  };
+
+  // ================== DOM SHORTCUTS ==================
+  var $ = function(id){ return document.getElementById(id); };
+  var screens = { select: $("screenSelect"), details: $("screenDetails"), confirm: $("screenConfirm") };
+  var detailsBar = $("detailsBar");
+
+  function showScreen(name){
+    Object.keys(screens).forEach(function(k){ screens[k].classList.toggle("active", k===name); });
+    detailsBar.classList.toggle("active", name==="details");
+    $("backBtn").disabled = (name==="select");
+    window.scrollTo(0,0);
+  }
+
+  function toast(msg, isError){
+    var t = $("toast");
+    t.textContent = msg;
+    t.className = "toast show" + (isError ? " error" : "");
+    clearTimeout(toast._h);
+    toast._h = setTimeout(function(){ t.classList.remove("show"); }, 3200);
+  }
+
+  // ================== RENDER MACHINE CARDS ==================
+  function renderMachineList(){
+    var wrap = $("machineList");
+    wrap.innerHTML = "";
+    MACHINES.forEach(function(m){
+      var card = document.createElement("div");
+      card.className = "m-card" + (state.option===m.option ? " selected" : "");
+      card.setAttribute("data-option", m.option);
+      card.innerHTML =
+        '<div class="m-card-head">' +
+          '<div class="badge-idx"><span class="dot"></span>' + m.idx + '</div>' +
+          '<div class="badge-selected">✓ தேர்வு செய்யப்பட்டது</div>' +
+        '</div>' +
+        '<div class="m-card-body">' +
+          '<div class="m-icon">' + m.icon + '</div>' +
+          '<div class="m-text">' +
+            '<p class="m-title-ta">' + m.titleTa + '</p>' +
+            '<p class="m-title-en">' + m.titleEn + '</p>' +
+            '<p class="m-desc">' + m.descTa + '</p>' +
+          '</div>' +
+          '<div class="m-arrow">→</div>' +
+        '</div>' +
+        '<div class="m-rate"><span>நிலையான கட்டணம் (Base Rate):</span><b>₹' + m.rate() + ' / ' + m.rateUnit + '</b></div>';
+      card.addEventListener("click", function(){ selectOption(m.option); });
+      wrap.appendChild(card);
+    });
+  }
+
+  function selectOption(opt){
+    state.option = opt;
+    renderMachineList();
+    var m = MACHINES.find(function(x){ return x.option===opt; });
+    $("summarySelectedText").textContent = "Selected: " + m.titleTa + " (" + m.titleEn + ")";
+    $("continueBtn").disabled = false;
+  }
+
+  // ================== SCREEN 1 -> 2 ==================
+  $("continueBtn").addEventListener("click", function(){
+    state.machineTitle = $("machineTitle").value.trim();
+    if(!state.machineTitle){ toast("Please enter the machine/vehicle title", true); return; }
+    if(!state.option){ toast("Please select a work type", true); return; }
+    openDetails();
+  });
+
+  $("chipRow").addEventListener("click", function(e){
+    var btn = e.target.closest(".chip");
+    if(!btn) return;
+    var text = btn.textContent.trim().replace(/^\S+\s/, "");
+    $("machineTitle").value = text;
+  });
+
+  function openDetails(){
+    var m = MACHINES.find(function(x){ return x.option===state.option; });
+    $("selIcon").textContent = m.icon;
+    $("selName").textContent = state.machineTitle + " (" + m.titleEn + ")";
+    $("selRate").textContent = "₹" + m.rate() + " / " + m.rateUnit;
+    $("detailsTitleEn").textContent = m.titleEn + " Work Details";
+    $("detailsTitleTa").textContent = m.titleTa + " • வேலை விவரங்கள்";
+
+    var isPacks = m.mode === "packs";
+    $("hoursMinutesBlock").style.display = isPacks ? "none" : "flex";
+    $("packsBlock").style.display = isPacks ? "flex" : "none";
+    $("timeEyebrow").textContent = isPacks ? "04 — NUMBER OF PACKS / பேக் எண்ணிக்கை" : "04 — MACHINE WORKED TIME / ஓடிய நேரம்";
+
+    updateCalc();
+    showScreen("details");
+  }
+
+  $("changeBtn").addEventListener("click", function(){ showScreen("select"); });
+  $("backBtn").addEventListener("click", function(){
+    if(!screens.details.classList.contains("active") && !screens.confirm.classList.contains("active")) return;
+    showScreen("select");
+  });
+
+  // ================== STEPPERS ==================
+  document.querySelectorAll(".stepper button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var target = btn.getAttribute("data-target");
+      var dir = parseInt(btn.getAttribute("data-dir"), 10);
+      if(target === "hours"){ state.hours = Math.max(0, state.hours + dir); $("hoursVal").textContent = state.hours; }
+      if(target === "minutes"){ state.minutes = Math.max(0, Math.min(59, state.minutes + dir*5)); $("minutesVal").textContent = state.minutes; }
+      if(target === "packs"){ state.packs = Math.max(1, state.packs + dir); $("packsVal").textContent = state.packs; }
+      updateCalc();
+    });
+  });
+
+  function currentTimeValue(){
+    var m = MACHINES.find(function(x){ return x.option===state.option; });
+    if(!m) return 0;
+    return m.mode==="packs" ? state.packs : (state.hours + state.minutes/60);
+  }
+
+  function updateCalc(){
+    var m = MACHINES.find(function(x){ return x.option===state.option; });
+    if(!m) return;
+    var amount = Math.round(currentTimeValue() * m.rate());
+    if(m.mode==="packs"){
+      $("calcLine1").textContent = "Total Packs: " + state.packs;
+    } else {
+      $("calcLine1").textContent = "Total Time: " + state.hours + " Hours " + state.minutes + " Minutes (" + (state.hours + state.minutes/60).toFixed(2) + " hrs)";
+    }
+    $("calcLine2").textContent = "Estimated Amount: ₹" + amount.toLocaleString("en-IN");
+  }
+
+  // ================== PHOTO ==================
+  $("photoDrop").addEventListener("click", function(){ $("photoInput").click(); });
+  $("changePhotoBtn").addEventListener("click", function(){ $("photoInput").click(); });
+  $("removePhotoBtn").addEventListener("click", function(){
+    state.imageBase64 = null; state.imageFileName = null; state.imageMimeType = null;
+    $("photoImg").style.display = "none";
+    $("photoOverlay").style.display = "none";
+    $("photoEmpty").style.display = "flex";
+    $("photoBadge").style.display = "none";
+    $("photoInput").value = "";
+  });
+  $("photoInput").addEventListener("change", function(e){
+    var file = e.target.files && e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      state.imageBase64 = ev.target.result;
+      state.imageFileName = file.name;
+      state.imageMimeType = file.type || "image/jpeg";
+      $("photoImg").src = state.imageBase64;
+      $("photoImg").style.display = "block";
+      $("photoEmpty").style.display = "none";
+      $("photoOverlay").style.display = "block";
+      $("photoFn").textContent = file.name;
+      $("photoMeta").textContent = new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+      $("photoBadge").style.display = "flex";
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // ================== SUBMIT ==================
+  $("submitBtn").addEventListener("click", function(){
+    state.customerName = $("customerName").value.trim();
+    state.phoneNumber = $("phoneNumber").value.trim();
+    state.place = $("place").value.trim();
+
+    if(!state.customerName){ toast("Please enter customer name", true); return; }
+    if(!state.phoneNumber){ toast("Please enter phone number", true); return; }
+    if(!state.place){ toast("Please enter place / village", true); return; }
+
+    var timeValue = currentTimeValue();
+    if(timeValue <= 0){ toast("Please set a valid time / pack count", true); return; }
+
+    var payload = {
+      action: "submit",
+      option: state.option,
+      machineTitle: state.machineTitle,
+      customerName: state.customerName,
+      phoneNumber: state.phoneNumber,
+      place: state.place,
+      timeValue: timeValue
+    };
+    if(state.imageBase64){
+      payload.imageBase64 = state.imageBase64;
+      payload.imageFileName = state.imageFileName;
+      payload.imageMimeType = state.imageMimeType;
+    }
+
+    var btn = $("submitBtn");
+    var originalText = btn.textContent;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Saving...';
+
+    fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      btn.disabled = false; btn.textContent = originalText;
+      if(res && res.success){
+        showConfirmation(res);
+      } else {
+        toast((res && res.error) ? res.error : "Save failed. Please try again.", true);
+      }
+    })
+    .catch(function(err){
+      btn.disabled = false; btn.textContent = originalText;
+      toast("Network error: " + err.message, true);
+    });
+  });
+
+  function showConfirmation(res){
+    var m = MACHINES.find(function(x){ return x.option===state.option; });
+    $("docketId").textContent = "#R" + (res.row || "—");
+    $("rMachine").textContent = state.machineTitle;
+    $("rWorkType").textContent = m.titleTa + " (" + m.titleEn + ")";
+    $("rCustomer").textContent = state.customerName;
+    $("rPlace").textContent = state.place;
+    $("rPhone").textContent = state.phoneNumber;
+    $("rTime").textContent = (m.mode==="packs") ? (state.packs + " Packs") : (state.hours + "h " + state.minutes + "m");
+    $("rAmount").textContent = "₹" + Number(res.totalAmount || 0).toLocaleString("en-IN");
+
+    if(res.imageUrl){
+      $("rPhotoStatus").textContent = "Geo-tagged ✓";
+      $("rPhotoWrap").style.display = "block";
+      $("rPhotoImg").src = state.imageBase64 || res.imageUrl;
+      $("rPhotoCap").textContent = new Date().toLocaleString();
+    } else {
+      $("rPhotoStatus").textContent = "No photo";
+      $("rPhotoWrap").style.display = "none";
+    }
+    showScreen("confirm");
+  }
+
+  $("newEntryBtn").addEventListener("click", function(){
+    state = { option:null, machineTitle:"", customerName:"", phoneNumber:"", place:"", hours:5, minutes:30, packs:1, imageBase64:null, imageFileName:null, imageMimeType:null };
+    $("machineTitle").value = ""; $("customerName").value = ""; $("phoneNumber").value = ""; $("place").value = "";
+    $("hoursVal").textContent = "5"; $("minutesVal").textContent = "30"; $("packsVal").textContent = "1";
+    $("continueBtn").disabled = true;
+    $("summarySelectedText").textContent = "Selected: —";
+    $("removePhotoBtn").click();
+    renderMachineList();
+    showScreen("select");
+  });
+
+  // ================== SETTINGS ==================
+  $("settingsBtn").addEventListener("click", function(){
+    $("setRate1").value = settings.rate1PerHour;
+    $("setRate2").value = settings.rate2PerPack;
+    $("setRate3").value = settings.rate3PerHour;
+    $("settingsModal").classList.add("active");
+  });
+  $("settingsCancel").addEventListener("click", function(){ $("settingsModal").classList.remove("active"); });
+  $("settingsSave").addEventListener("click", function(){
+    var payload = {
+      action: "updateSettings",
+      rate1PerHour: parseFloat($("setRate1").value) || 0,
+      rate2PerPack: parseFloat($("setRate2").value) || 0,
+      rate3PerHour: parseFloat($("setRate3").value) || 0
+    };
+    fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if(res && res.success){
+        settings = res.settings;
+        renderMachineList();
+        if(state.option) updateCalc();
+        $("settingsModal").classList.remove("active");
+        toast("Settings updated");
+      } else {
+        toast("Could not update settings", true);
+      }
+    })
+    .catch(function(err){ toast("Network error: " + err.message, true); });
+  });
+
+  // ================== INIT: fetch live settings ==================
+  function loadSettings(){
+    fetch(APPS_SCRIPT_URL + "?action=getSettings")
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if(res && res.success && res.settings){
+          settings = res.settings;
+          renderMachineList();
+        }
+      })
+      .catch(function(){ /* keep local defaults if offline */ });
+  }
+
+  renderMachineList();
+  showScreen("select");
+  loadSettings();
+
+})();
+</script>
+</body>
+</html>
